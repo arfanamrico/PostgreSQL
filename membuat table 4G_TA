@@ -1,0 +1,63 @@
+import psycopg2
+
+host='localhost'
+dbname='xlro'
+user='postgres'
+password='1234'
+port=5432
+
+def create_table_ta_4g():
+    try:
+        # Membuka koneksi ke server PostgreSQL
+        conn = psycopg2.connect(
+            host=host,
+            port=port,
+            user=user,
+            password=password,
+            database=dbname  # Ganti dengan nama database Anda
+        )
+
+        # Membuat cursor
+        cursor = conn.cursor()
+
+        # Query untuk membuat tabel TA_4G
+        create_table_query = """
+        CREATE TABLE TA_4G (
+            "Date" DATE,
+            "eNodeB Name" VARCHAR(255),
+            "LocalCell Id" INT,
+            "Cell Name" VARCHAR(255),
+            "eNodeB Function Name" VARCHAR(255),
+            "L-TA_0-156 m" NUMERIC,
+            "L-TA_156-234 m" NUMERIC,
+            "L-TA_234-546 m" NUMERIC,
+            "L-TA_546-1.014 km" NUMERIC,
+            "L-TA_1.014-1.950 km" NUMERIC,
+            "L-TA_1.950-3.510 km" NUMERIC,
+            "L-TA_3.510-6.630 km" NUMERIC,
+            "L-TA_6.630-14.430 km" NUMERIC,
+            "L-TA_14.430-30.030 km" NUMERIC,
+            "L-TA_30.030-53.430 km" NUMERIC,
+            "L-TA_53.430-76.830 km" NUMERIC,
+            "L-TA_more 76.830 km" NUMERIC,
+            PRIMARY KEY ("Date", "eNodeB Name", "LocalCell Id", "Cell Name")
+        );
+        """
+
+        # Menjalankan query untuk membuat tabel
+        cursor.execute(create_table_query)
+        conn.commit()
+        print("Tabel TA_4G berhasil dibuat.")
+
+    except Exception as e:
+        print("Terjadi kesalahan saat membuat tabel:", e)
+
+    finally:
+        # Menutup koneksi
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+if __name__ == "__main__":
+    create_table_ta_4g()
