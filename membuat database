@@ -1,0 +1,40 @@
+import psycopg2
+
+host='localhost'
+# dbname='postgres'
+user='postgres'
+password='1234'
+port=5432
+
+def create_database(db_name):
+    try:
+        # Membuka koneksi ke server PostgreSQL
+        conn = psycopg2.connect(
+            host=host,
+            port=port,
+            user=user,
+            password=password
+        )
+        # Menutup autocommit untuk memungkinkan CREATE DATABASE di luar transaksi
+        conn.set_isolation_level(0)
+        # Membuat cursor
+        cursor = conn.cursor()
+
+        # Menjalankan query untuk membuat database baru
+        cursor.execute(f"CREATE DATABASE {db_name};")
+        conn.commit()
+        print(f"Database '{db_name}' berhasil dibuat.")
+
+    except Exception as e:
+        print("Terjadi kesalahan saat membuat database:", e)
+
+    finally:
+        # Menutup koneksi
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+
+if __name__ == "__main__":
+    create_database("XLRO")
