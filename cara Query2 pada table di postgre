@@ -1,0 +1,25 @@
+import pandas as pd
+import psycopg2
+
+host='localhost'
+dbname='xlro'
+user='postgres'
+password='1234'
+port=5432
+conn = psycopg2.connect(host='localhost',dbname='xlro',user='postgres',password='1234',port=5432)
+
+# cursor = conn.cursor()
+
+query = """
+    SELECT * FROM TA_4G
+    WHERE "Date" = '2024-12-11'
+    AND "eNodeB Name" = '424PC167E_LTE_NAGOYA_HILL';
+"""
+
+# Membaca data ke dalam DataFrame
+data = pd.read_sql(query, conn)
+# Menampilkan data yang sudah difilter
+print(data)
+
+# Menutup koneksi
+conn.close()
