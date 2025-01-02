@@ -1,0 +1,89 @@
+import pandas as pd
+import psycopg2
+
+host='localhost'
+dbname='xlro'
+user='postgres'
+password='1234'
+port=5432
+# conn = psycopg2.connect(host='localhost',dbname='postgres',user='postgres',password='1234',port=5432)
+
+rawta = r"D:\RO XL\TA\data_ta_20241214.xlsx"
+dfraw = pd.read_excel(rawta)
+df = pd.DataFrame(dfraw)
+
+def clean_and_upsert_ta_4g(dataframe):
+    try:
+        # Membersihkan DataFrame dengan memastikan kolom 'Date' memiliki nilai valid
+        dataframe['Date'] = pd.to_datetime(dataframe['Date'], errors='coerce')
+        cleaned_df = dataframe.dropna(subset=['Date'])  # Hapus baris dengan tanggal tidak valid
+        # print(cleaned_df)
+
+        # Upsert data yang sudah dibersihkan
+        upsert_ta_4g(cleaned_df)
+    except Exception as e:
+        print("Terjadi kesalahan saat membersihkan atau mengupsert data:", e)
+
+
+
+def upsert_ta_4g(dataframe):
+    try:
+        # Membuka koneksi ke server PostgreSQL
+        conn = psycopg2.connect(
+            host=host,
+            port=port,
+            user=user,
+            password=password,
+            database=dbname  # Ganti dengan nama database Anda
+        )
+
+        # Membuat cursor
+        cursor = conn.cursor()
+
+        # Iterasi melalui DataFrame dan melakukan upsert
+        for index, row in dataframe.iterrows():
+            upsert_query = """
+            INSERT INTO TA_4G (
+                "Date", "eNodeB Name", "LocalCell Id", "Cell Name", 
+                "eNodeB Function Name", "L-TA_0-156 m", "L-TA_156-234 m", 
+                "L-TA_234-546 m", "L-TA_546-1.014 km", "L-TA_1.014-1.950 km", 
+                "L-TA_1.950-3.510 km", "L-TA_3.510-6.630 km", "L-TA_6.630-14.430 km", 
+                "L-TA_14.430-30.030 km", "L-TA_30.030-53.430 km", "L-TA_53.430-76.830 km", 
+                "L-TA_more 76.830 km"
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            ON CONFLICT ("Date", "eNodeB Name", "LocalCell Id", "Cell Name")
+            DO UPDATE SET 
+                "eNodeB Function Name" = EXCLUDED."eNodeB Function Name",
+                "L-TA_0-156 m" = EXCLUDED."L-TA_0-156 m",
+                "L-TA_156-234 m" = EXCLUDED."L-TA_156-234 m",
+                "L-TA_234-546 m" = EXCLUDED."L-TA_234-546 m",
+                "L-TA_546-1.014 km" = EXCLUDED."L-TA_546-1.014 km",
+                "L-TA_1.014-1.950 km" = EXCLUDED."L-TA_1.014-1.950 km",
+                "L-TA_1.950-3.510 km" = EXCLUDED."L-TA_1.950-3.510 km",
+                "L-TA_3.510-6.630 km" = EXCLUDED."L-TA_3.510-6.630 km",
+                "L-TA_6.630-14.430 km" = EXCLUDED."L-TA_6.630-14.430 km",
+                "L-TA_14.430-30.030 km" = EXCLUDED."L-TA_14.430-30.030 km",
+                "L-TA_30.030-53.430 km" = EXCLUDED."L-TA_30.030-53.430 km",
+                "L-TA_53.430-76.830 km" = EXCLUDED."L-TA_53.430-76.830 km",
+                "L-TA_more 76.830 km" = EXCLUDED."L-TA_more 76.830 km";
+            """
+
+            cursor.execute(upsert_query, tuple(row))
+
+        conn.commit()
+        print("Data berhasil di-upsert ke tabel TA_4G.")
+
+    except Exception as e:
+        print("Terjadi kesalahan saat mengupsert data:", e)
+
+    finally:
+        # Menutup koneksi
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+if __name__ == "__main__":
+#     upsert_ta_4g(df)
+    # Bersihkan dan upsert data
+    clean_and_upsert_ta_4g(df)
