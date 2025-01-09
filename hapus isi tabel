@@ -1,0 +1,40 @@
+import psycopg2
+import time
+start_time = time.time()
+
+def clear_table(connection_params, table_name):
+    try:
+        # Establish connection
+        conn = psycopg2.connect(**connection_params)
+        cur = conn.cursor()
+
+        # SQL query to delete all rows
+        clear_table_query = f"TRUNCATE TABLE {table_name} RESTART IDENTITY CASCADE;"
+
+        # Execute the query
+        cur.execute(clear_table_query)
+        conn.commit()
+
+        print(f"All rows in table '{table_name}' have been deleted.")
+    except psycopg2.Error as e:
+        print(f"Database Error: {e}")
+    finally:
+        if conn:
+            cur.close()
+            conn.close()
+
+# Connection parameters
+connection_params = {
+    "dbname": "xlro",
+    "user": "postgres",
+    "password": "1234",
+    "host": "localhost",
+    "port": 5432
+}
+
+# Call the function to clear a table
+table_name = "kpi_mon_tmp"  # Replace with the name of your table
+clear_table(connection_params, table_name)
+
+end_time = time.time()
+print (f'Execution time:{end_time-start_time:.2f} seconds oleh Premanzx')
