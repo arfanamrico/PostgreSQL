@@ -1,0 +1,35 @@
+# =========================
+# KONFIGURASI DATABASE
+# =========================
+DB_CONFIG = {
+    "host": "localhost",
+    "port": "5432",
+    "database": "ioh_jabo",
+    "user": "postgres",
+    "password": "1234"
+}
+###========melihat table didatabas==========
+# import psycopg2
+
+# conn = psycopg2.connect(**DB_CONFIG)
+# cursor = conn.cursor()
+
+# # ===== QUERY LIST TABLE =====
+# cursor.execute("""
+# SELECT table_schema, table_name
+# FROM information_schema.tables
+# WHERE table_type = 'BASE TABLE'
+# AND table_schema NOT IN ('pg_catalog', 'information_schema')
+# ORDER BY table_schema, table_name;
+# """)
+
+# tables = cursor.fetchall()
+
+# # ===== TAMPILKAN =====
+# print("Daftar tabel di database:\n")
+# for schema, table in tables:
+#     print(f"{schema}.{table}")
+
+# # ===== CLOSE =====
+# cursor.close()
+# conn.close()
