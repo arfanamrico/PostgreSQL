@@ -1,0 +1,121 @@
+# =========================
+# KONFIGURASI DATABASE
+# =========================
+DB_CONFIG = {
+    "host": "localhost",
+    "port": "5432",
+    "database": "ioh_jabo",
+    "user": "postgres",
+    "password": "1234"
+}
+###==== import raw kpi=======
+# import os
+# import pandas as pd
+# import psycopg2
+# from io import StringIO
+
+
+# FOLDER_PATH = r"C:\Users\Lenovo\Documents\Raw\raw kpi"
+
+# conn = psycopg2.connect(**DB_CONFIG)
+# cursor = conn.cursor()
+
+# for file in os.listdir(FOLDER_PATH):
+#     if file.endswith(".csv"):
+#         print(f"Processing: {file}")
+#         file_path = os.path.join(FOLDER_PATH, file)
+
+#         try:
+#             # ===== 1. BACA CSV =====
+#             df = pd.read_csv(file_path)
+
+#             # ===== 2. BERSIHKAN KOLOM =====
+#             df.columns = (
+#                 df.columns
+#                 .str.strip()
+#                 .str.lower()
+#                 .str.replace(' ', '_')
+#                 .str.replace('(', '')
+#                 .str.replace(')', '')
+#                 .str.replace('%', 'pct')
+#                 .str.replace('/', '_')
+#             )
+
+#             # ===== 3. PARSE DATE =====
+#             if 'date' in df.columns:
+#                 df['date'] = pd.to_datetime(df['date'], format='%d-%m-%y', errors='coerce').dt.date
+
+#             # ===== 4. DROP DATA PENTING YANG KOSONG =====
+#             df = df.dropna(subset=['date', 'siteid', 'ecell_id'])
+
+#             if df.empty:
+#                 print("⚠ Data kosong, skip")
+#                 continue
+
+#             # ===== 5. AMBIL KOLOM DATABASE =====
+#             cursor.execute("""
+#                 SELECT column_name
+#                 FROM information_schema.columns
+#                 WHERE table_name = 'daily_lte_kpi'
+#                 ORDER BY ordinal_position;
+#             """)
+#             db_cols = [row[0] for row in cursor.fetchall()]
+
+#             # ===== 6. SAMAKAN KOLOM =====
+#             for col in db_cols:
+#                 if col not in df.columns:
+#                     df[col] = None
+
+#             df = df[db_cols]
+#             # ===== 7. FIX TIPE DATA (PENTING 🔥) =====
+#             for col in df.columns:
+#                 try:
+#             # convert ke numeric jika bisa
+#                     df[col] = pd.to_numeric(df[col], errors='ignore')
+
+#             # jika float → ubah ke integer
+#                     if df[col].dtype == 'float64':
+#                         df[col] = df[col].fillna(0)
+#                         df[col] = df[col].astype('int64')
+
+#                 except:
+#                     pass
+
+#             # ===== 8. HANDLE NULL =====
+#             df = df.where(pd.notnull(df), None)
+
+#             # ===== 9. COPY KE TEMP TABLE =====
+#             buffer = StringIO()
+#             df.to_csv(buffer, index=False, header=False)
+#             buffer.seek(0)
+
+#             # buat temp table
+#             cursor.execute("DROP TABLE IF EXISTS temp_import;")
+#             cursor.execute(f"""
+#                 CREATE TEMP TABLE temp_import AS 
+#                 SELECT * FROM daily_lte_kpi LIMIT 0;
+#             """)
+
+#             cursor.copy_expert(
+#                 f"COPY temp_import ({','.join(db_cols)}) FROM STDIN WITH CSV",
+#                 buffer
+#             )
+
+#             # ===== 10. INSERT ANTI DUPLIKAT =====
+#             cursor.execute(f"""
+#                 INSERT INTO daily_lte_kpi ({','.join(db_cols)})
+#                 SELECT {','.join(db_cols)} FROM temp_import
+#                 ON CONFLICT (date, siteid, ecell_id) DO NOTHING;
+#             """)
+
+#             conn.commit()
+#             print(f"✔ Sukses: {file}")
+
+#         except Exception as e:
+#             conn.rollback()
+#             print(f"❌ Error: {e}")
+
+# cursor.close()
+# conn.close()
+
+# print("SELESAI 🚀")
