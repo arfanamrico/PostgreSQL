@@ -1,0 +1,31 @@
+# KONFIGURASI DATABASE
+# =========================
+DB_CONFIG = {
+    "host": "localhost",
+    "port": "5432",
+    "database": "ioh_jabo",
+    "user": "postgres",
+    "password": "1234"
+}
+####======melihat isi tabel==========
+import psycopg2
+import pandas as pd
+
+conn = psycopg2.connect(**DB_CONFIG)
+cursor = conn.cursor()
+
+# ===== QUERY DATA =====
+cursor.execute(f"""SELECT * FROM antenna_beam 
+               where typeantenna like 'AAU5768%';               
+               """)
+
+rows = cursor.fetchall()
+
+# ===== AMBIL NAMA KOLOM =====
+colnames = [desc[0] for desc in cursor.description]
+
+# ===== PRINT =====
+print(pd.DataFrame(rows,columns=colnames))
+# ===== CLOSE =====
+cursor.close()
+conn.close()
